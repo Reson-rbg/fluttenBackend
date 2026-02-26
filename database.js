@@ -62,10 +62,61 @@ function initDb() {
             FOREIGN KEY (userId) REFERENCES users (id)
         )`, (err) => {
             if (!err) {
-                // Migration for mood
                 db.run(`ALTER TABLE check_ins ADD COLUMN mood INTEGER`, (err) => {});
             }
         });
+
+        // ===== V2.0 新增表 =====
+
+        // 专注会话表
+        db.run(`CREATE TABLE IF NOT EXISTS focus_sessions (
+            id TEXT PRIMARY KEY,
+            userId TEXT,
+            todoId TEXT,
+            startTime TEXT,
+            endTime TEXT,
+            duration INTEGER,
+            FOREIGN KEY (userId) REFERENCES users (id),
+            FOREIGN KEY (todoId) REFERENCES todos (id)
+        )`);
+
+        // 用户徽章表
+        db.run(`CREATE TABLE IF NOT EXISTS user_badges (
+            id TEXT PRIMARY KEY,
+            userId TEXT,
+            badgeKey TEXT,
+            unlockedAt TEXT,
+            FOREIGN KEY (userId) REFERENCES users (id)
+        )`);
+
+        // 任务模板表
+        db.run(`CREATE TABLE IF NOT EXISTS task_templates (
+            id TEXT PRIMARY KEY,
+            userId TEXT,
+            title TEXT,
+            description TEXT,
+            tags TEXT,
+            isFocus INTEGER DEFAULT 0,
+            createdAt TEXT,
+            FOREIGN KEY (userId) REFERENCES users (id)
+        )`);
+
+        // 广场事件表 (匿名成就)
+        db.run(`CREATE TABLE IF NOT EXISTS plaza_events (
+            id TEXT PRIMARY KEY,
+            userId TEXT,
+            eventType TEXT,
+            eventDescription TEXT,
+            createdAt TEXT,
+            FOREIGN KEY (userId) REFERENCES users (id)
+        )`);
+
+        // 用户设置表
+        db.run(`CREATE TABLE IF NOT EXISTS user_settings (
+            userId TEXT PRIMARY KEY,
+            showOnPlaza INTEGER DEFAULT 0,
+            FOREIGN KEY (userId) REFERENCES users (id)
+        )`);
     });
 }
 
